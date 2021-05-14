@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block main %}
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Результат</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h5>Пользовательские данные:</h5>
+                <div>Кредитная история: <span id="ch"></span></div>
+                <div>Доход: <span id="ai"></span></div>
+                <div>Доход созаявителя: <span id="ci"></span></div>
+                <div>Количество иждивенцев: <span id="nd"></span></div>
+                <div>Сумма кредита: <span id="la"></span></div>
+                <div>На срок: <span id="lat"></span></div>
+                <h5 class="pt-3">Итог:</h5>
+                <div id="prediction"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                <a class="btn btn-primary" href="/results" role="button">Посмотреть базу данных</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pt-5">
+    <div class="row justify-content-md-center">
+        <div class="col-md-4">
+            <h1 style="text-align: center; background-color: rgb(250, 250, 120); font-family:Georgia, 'Times New Roman', Times, serif; font-size: 25px;"><b>
+                Заполните форму и узнайте, можете ли вы получить кредит
+            </b></h1>
+            <form action="" id="post-form">
+                {% csrf_token %}
+                <div class="form-group" style="background-color: rgb(250, 250, 120);">
+                    <label for="credit_history">Кредитная история<strong>(0 - плохая, 1 - хорошая)</strong></label>
+                    <input type="number" step="1" class="form-control" id="credit_history" placeholder="" required>
+                </div>
+                <div class="form-group" style="background-color: rgb(250, 250, 120);">
+                    <label for="applicant_income">Личный доход $</label>
+                    <input type="number" step="100" class="form-control" id="applicant_income" placeholder="" required>
+                </div>
+                <div class="form-group" style="background-color: rgb(250, 250, 120);">
+                    <label for="coapplicant_income">Доход созаявителя $<strong>(если такой имеется)</strong></label>
+                    <input type="number" step="100" class="form-control" id="coapplicant_income" placeholder="" required>
+                </div>
+                <div class="form-group" style="background-color: rgb(250, 250, 120);">
+                    <label for="dependents">Количество иждивенцев в семье</label>
+                    <input type="number" step="1" class="form-control" id="dependents" placeholder="" required>
+                </div>
+                <div class="form-group" style="background-color: rgb(250, 250, 120);">
+                    <label for="loan_amount">Кредит на сумму (в тысячах: 20=20000) $</label>
+                    <input type="number" step="1" class="form-control" id="loan_amount" placeholder="" required>
+                </div>
+                <div class="form-group" style="background-color: rgb(250, 250, 120);">
+                    <label for="loan_amount_term">На срок (в месяцах)</label>
+                    <input type="number" step="1" class="form-control" id="loan_amount_term" placeholder="" required>
+                </div>
+                <button type="submit" value="Submit" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" style="background-color: rgb(64, 180, 41);">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).on('submit', '#post-form',function(e){
+        e.preventDefault();
+        $.ajax({
+            type:'POST',
+            url:'{% url "predict:submit_prediction" %}',
+            data:{
+                credit_history:$('#credit_history').val(),
+                applicant_income:$('#applicant_income').val(),
+                coapplicant_income:$('#coapplicant_income').val(),
+                dependents:$('#dependents').val(),
+                loan_amount:$('#loan_amount').val(),
+                loan_amount_term:$('#loan_amount_term').val(),
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                action: 'post'
+            },
+            success:function(json) {
+                document.forms["post-form"].reset();
+                document.getElementById("prediction").innerHTML = json['result']
+                document.getElementById("ch").innerHTML = json['credit_history']
+                document.getElementById("ai").innerHTML = json['applicant_income']
+                document.getElementById("ci").innerHTML = json['coapplicant_income']
+                document.getElementById("nd").innerHTML = json['dependents']
+                document.getElementById("la").innerHTML = json['loan_amount']
+                document.getElementById("lat").innerHTML = json['loan_amount_term']
+            },
+            error : function(xhr,errmsg,err) {
+
+            }
+        });
+    })
+</script>
+
+{% endblock %}
+

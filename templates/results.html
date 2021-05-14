@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <div class="container pt-5" style="background-color: #f8f9fa;">
+        <div class="row">
+
+        <h1>Результаты</h1>
+
+            <table class="table">
+                <thead>
+                <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Кредитная история</th>
+                <th scope="col">Доход</th>
+                <th scope="col">Доход созаявителя</th>
+                <th scope="col">Количество иждивенцев</th>
+                <th scope="col">Сумма кредита</th>
+                <th scope="col">Срок кредита</th>
+                <th scope="col">Вердикт</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for data in dataset %}
+                    <tr>
+                    <th scope="row">{{ data.id }}</th>
+                    <td>{{ data.credit_history }}</td>
+                    <td>{{ data.applicant_income }}</td>
+                    <td>{{ data.coapplicant_income }}</td>
+                    <td>{{ data.dependents }}</td>
+                    <td>{{ data.loan_amount }}</td>
+                    <td>{{ data.loan_amount_term }}</td>
+                    <td>{{ data.classification }}</td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
